@@ -6,18 +6,18 @@ import 'package:printing/printing.dart';
 
 class PdfPage {
   static Future<Uint8List> create() async {
-    // var pathToFile = await rootBundle.load('- your icon font file (.ttf) -');
-    // final ttf = Font.ttf(pathToFile);
-    // final fontData = await rootBundle.load('assets/ShipporiMincho-Regular.ttf');
-    // final font = Font.ttf(fontData);
-
     final pdf = Document();
 
-    // 表紙
-    final cover = Page(
+    // TODO pdf用のフォントは定義したほうがいいと思う
+    final fontData = await rootBundle.load('assets/fonts/NotoSansJP-Regular.ttf');
+    final font = Font.ttf(fontData);
+
+    final image = await rootBundle.load('assets/images/mucha_icon.png');
+
+    final page = Page(
       pageTheme: PageTheme(
         theme: ThemeData.withFont(
-          // base: await PdfGoogleFonts.varelaRoundRegular(),
+          base: font,
           // bold: await PdfGoogleFonts.varelaRoundRegular(),
           icons: await PdfGoogleFonts.materialIcons(),
         ),
@@ -39,19 +39,23 @@ class PdfPage {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // memo :  fontWeightは、styleで定義する
+                    // memo :  sizeは、直定義でも反映される
+                    // memo :  漢字はstyleにfont: font,しないと表示されなさそう。
                     Text(
                       '請求書',
                       style: TextStyle(
-                        fontSize: 20,
+                        font: font,
+                        fontSize: 50,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 8),
                     Text('Apple, inc'),
                     SizedBox(height: 2),
-                    Text('東京'),
+                    Text('東京', style: TextStyle(font: font)),
                     SizedBox(height: 2),
-                    Text('コンクリートジャングル'),
+                    Text('コンクリートジャングル', style: const TextStyle(color: PdfColors.red)),
                     SizedBox(height: 16),
                     Text(
                       '注文番号：  11111',
@@ -125,12 +129,14 @@ class PdfPage {
                 ),
               ],
             ),
+            SizedBox(height: 20),
+            Image(MemoryImage(image.buffer.asUint8List()), width: 100, height: 100),
           ],
         );
       },
     );
 
-    pdf.addPage(cover);
+    pdf.addPage(page);
     return await pdf.save();
     // return pdf;
   }
